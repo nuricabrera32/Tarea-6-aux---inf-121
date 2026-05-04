@@ -1,0 +1,131 @@
+# -------------------------
+# CLASE BASE (HERENCIA)
+# -------------------------
+class Persona:
+    def __init__(self, nombre, ci):
+        self.nombre = nombre
+        self.ci = ci
+
+
+class Estudiante(Persona):
+    def __init__(self, nombre, ci, registro, semestre):
+        super().__init__(nombre, ci)
+        self.registro = registro
+        self.semestre = semestre
+        self.inscripciones = []  # Asociación
+
+
+class Docente(Persona):
+    def __init__(self, nombre, ci, especialidad, carga_horaria):
+        super().__init__(nombre, ci)
+        self.especialidad = especialidad
+        self.carga_horaria = carga_horaria
+
+
+# -------------------------
+# AMBIENTES (HERENCIA)
+# -------------------------
+class Ambiente:
+    def __init__(self, codigo, capacidad):
+        self.codigo = codigo
+        self.capacidad = capacidad
+
+
+class Aula(Ambiente):
+    def __init__(self, codigo, capacidad):
+        super().__init__(codigo, capacidad)
+
+
+class Laboratorio(Ambiente):
+    def __init__(self, codigo, capacidad, nro_computadoras, software):
+        super().__init__(codigo, capacidad)
+        self.nro_computadoras = nro_computadoras
+        self.software = software
+
+
+# -------------------------
+# COMPOSICIÓN (Materia ♦ Examen)
+# -------------------------
+class Examen:
+    def __init__(self, fecha, tipo):
+        self.fecha = fecha
+        self.tipo = tipo
+
+
+# -------------------------
+# CLASE PRINCIPAL
+# -------------------------
+class Materia:
+    def __init__(self, nombre, sigla, docente, ambiente):
+        self.nombre = nombre
+        self.sigla = sigla
+        self.docente = docente      # Asociación obligatoria
+        self.ambiente = ambiente    # Asociación
+        self.estudiantes = []       # Agregación
+        self.examenes = []          # Composición
+
+    def agregar_estudiante(self, estudiante):
+        self.estudiantes.append(estudiante)
+
+    def agregar_examen(self, fecha, tipo):
+        examen = Examen(fecha, tipo)  # composición
+        self.examenes.append(examen)
+
+    def mostrar_estudiantes(self):
+        for e in self.estudiantes:
+            print(e.nombre)
+
+
+# -------------------------
+# ASOCIACIÓN CON ATRIBUTOS (Notas)
+# -------------------------
+class Inscripcion:
+    def __init__(self, estudiante, materia, nota_final=0):
+        self.estudiante = estudiante
+        self.materia = materia
+        self.nota_final = nota_final
+        self.estado = "Inscrito"
+
+        # vinculación bidireccional
+        estudiante.inscripciones.append(self)
+        materia.agregar_estudiante(estudiante)
+
+
+# -------------------------
+# PRUEBA (MAIN)
+# -------------------------
+if __name__ == "__main__":
+
+    # Docente
+    doc = Docente("Carlos Perez", "123", "Programación", 40)
+
+    # Ambientes
+    aula = Aula("A1", 40)
+    lab = Laboratorio("L1", 25, 20, "Python")
+
+    # Materia
+    materia = Materia("Programación II", "INF-121", doc, lab)
+
+    # Estudiantes
+    e1 = Estudiante("Ana", "111", "2021001", 3)
+    e2 = Estudiante("Luis", "222", "2021002", 3)
+
+    # Inscripciones (aquí van notas)
+    ins1 = Inscripcion(e1, materia, 80)
+    ins2 = Inscripcion(e2, materia, 65)
+
+    # Exámenes (composición)
+    materia.agregar_examen("2026-06-10", "Parcial")
+    materia.agregar_examen("2026-07-20", "Final")
+
+    # Mostrar datos
+    print("Materia:", materia.nombre)
+    print("Docente:", materia.docente.nombre)
+    print("Ambiente:", materia.ambiente.codigo)
+
+    print("\nEstudiantes inscritos:")
+    materia.mostrar_estudiantes()
+
+    print("\nNotas:")
+    for ins in e1.inscripciones:
+        print(ins.estudiante.nombre, ins.nota_final)
